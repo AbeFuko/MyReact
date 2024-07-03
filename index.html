@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My React App</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="container"></div>
+
+  <script type="text/babel">
+    'use strict';
+
+    {
+      // **************************
+      // メニューコンポーネント
+      // **************************
+      const Menu = (props) => {
+        // 定数とその定数を操作する命令を分割代入で宣言する
+        // const [count, setCount] = React.useState(0);
+
+        // イベントで呼び出す際にdecrement()とかっこを付けると返り値を返すこととなり意味が違くなるため注意
+        const decrement = () => {
+          // if (count > 0) {
+            // setCount(count - 1);
+            // App Component function
+            props.onDecrement(props.menuId);
+          // }
+        };
+
+        const increment = () => {
+          // setCount(count + 1);
+          // 2個ずつカウントアップしたいとき、直前のsetCountで更新したcountに対してプラス1するには以下のように書く必要がある
+          // setCount((prevCount) => { return prevCount + 1});
+          props.onIncrement(props.menuId);
+        };
+
+        return (
+          <li>
+            <button onClick={decrement}>-</button>
+            <button onClick={increment}>+</button>
+            {props.name} ({props.price}円 × {props.count}個)
+          </li>
+        );
+      }
+
+      // **************************
+      // Appコンポーネント
+      // コンポーネント名は必ず大文字から始めること
+      // **************************
+      const App = () => {
+        const [counts, setCounts] = React.useState([0, 0, 0]);
+
+        const menus = [
+          {id: 0, name: '牛丼', price: 500},
+          {id: 1, name: 'カレー', price: 700},
+          {id: 2, name: 'サラダ', price: 300},
+        ];
+
+        // const total =
+        //   (menus[0].price * counts[0]) +
+        //   (menus[1].price * counts[1]) +
+        //   (menus[2].price * counts[2]);
+        // ↓
+        // reduceメソッドは配列の各要素に対して指定された関数を実行し、その結果を累積して最終的な単一の値を生成するために使用される
+        // array.reduce((accumulator, currentValue, currentIndex, array) => {
+        //   // 処理内容
+        // }, initialValue);
+        // acc：accumulatorの略
+        const total = menus.reduce((acc, menu) => {
+          return acc + (menu.price * counts[menu.id]);
+        }, 0);
+
+        const decrementMenu = (menuId) => {
+          if (counts[menuId] > 0) {
+            // スプレッド構文でコピー
+            const newCounts = [...counts];
+            newCounts[menuId]--;
+            setCounts(newCounts);
+          }
+        };
+        const incrementMenu = (menuId) => {
+          // スプレッド構文でコピー
+          const newCounts = [...counts];
+          newCounts[menuId]++;
+          setCounts(newCounts);
+        };
+
+        const menuItems = menus.map((menu) => {
+          return (
+            <Menu
+              key={menu.id}
+              menuId={menu.id}
+              count={counts[menu.id]}
+              name={menu.name}
+              price={menu.price}
+              onDecrement={decrementMenu}
+              onIncrement={incrementMenu}
+            />
+          );
+        });
+
+        return (
+          // React.createElement('h1', null, 'メニュー')
+          // 上記を「JSX記法」にすると以下になる。
+          // JSX記法では1つの要素しか渡せない→特にまとめるタグがない場合はフラグメント（<></>）タグで囲う
+          <>
+            <h1>メニュー</h1>
+            <ul className="menus">
+              {menuItems}
+            </ul>
+            <p>合計： {total}円</p>
+          </>
+        )
+      };
+
+      // **************************
+      // 実処理
+      // **************************
+      const container = document.querySelector('#container');
+      const root = ReactDOM.createRoot(container);
+      root.render(<App/>);
+    }
+</script>
+</body>
+</html>
